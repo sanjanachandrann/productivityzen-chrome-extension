@@ -1,0 +1,102 @@
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+module.exports = (env, argv) => {
+  const isProduction = argv.mode === 'production';
+  
+  return {
+    entry: {
+      popup: './src/popup/Popup.jsx',
+      options: './src/options/Options.jsx',
+      background: './src/background/background.js',
+      content: './src/content/content.js'
+    },
+    
+    output: {
+      path: path.resolve(__dirname, 'dist'),
+      filename: '[name]/[name].js',
+      clean: true
+    },
+    
+    module: {
+      rules: [
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env', '@babel/preset-react']
+            }
+          }
+        },
+        {
+          test: /\.css$/,
+          use: [
+            isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+            'css-loader'
+          ]
+        },
+        {
+          test: /\.(png|jpg|jpeg|gif|svg)$/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/images/[name][ext]'
+          }
+        }
+      ]
+    },
+    
+    plugins: [
+      new HtmlWebpackPlugin({
+        template: './public/popup.html',
+        filename: 'popup.html',
+        chunks: ['popup']
+      }),
+      
+      new HtmlWebpackPlugin({
+        template: './src/options/options.html',
+        filename: 'options.html',
+        chunks: ['options']
+      }),
+      
+      new CopyWebpackPlugin({
+        patterns: [
+          { from: 'manifest.json', to: 'manifest.json' },
+          { from: 'public/icons', to: 'icons' },
+          { from: 'assets', to: 'assets', noErrorOnMissing: true }
+        ]
+      }),
+      
+      ...(isProduction ? [
+        new MiniCssExtractPlugin({
+          filename: '[name]/[name].css'
+        })
+      ] : [])
+    ],
+    
+    resolve: {
+      extensions: ['.js', '.jsx', '.json'],
+      alias: {
+        '@': path.resolve(__dirname, 'src')
+      }
+    },
+    
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all'
+          }
+        }
+      }
+    },
+    
+    devtool: isProduction ? false : 'cheap-module-source-map'
+  };
+};
