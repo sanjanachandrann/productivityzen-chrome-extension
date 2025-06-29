@@ -13,8 +13,8 @@ A powerful Chrome extension built with React to help you track and enhance your 
 
 ## Screenshots
 
-![Dashboard](screenshots/dashboard.png)
-![Analytics](screenshots/analytics.png)
+![Screenshot 2025-06-29 220526](https://github.com/user-attachments/assets/7d4c6674-7b3d-43e6-9d51-c2025d361497)
+
 
 ## Installation
 
